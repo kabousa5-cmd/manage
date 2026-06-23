@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         BLS Manager - Ultimate Auto Address Fix (Online Update Version)
-// @version      56.10
+// @version      56.09
 // @match        https://morocco.blsportugal.com/*
 // @match        https://*.blsspainmorocco.net/*
 // @match        https://www.google.com/*
@@ -143,6 +143,7 @@
             field.dispatchEvent(new Event('blur', { bubbles: true }));
         }
 
+        // دالة ميزاجور اليدوية بقات غير احتياط ومربوطة بالبوطونة
         function checkAndApplyOnlineUpdateManually() {
             const updateBtn = document.getElementById('btn-online-update');
             if(updateBtn) updateBtn.innerText = "⏳ جاري التحديث...";
@@ -401,10 +402,19 @@
                 clientRow.innerHTML = `<div style="flex-grow:1; text-align:right;"><b>${profile.name}</b> ${bTypeLabel} <span style="color:#ffb86c; font-size:10px;">(${profile.data.PassportNo || ''})</span></div>`;
                 var actions = document.createElement('div'); actions.style.cssText = 'display:flex; gap:5px; align-items:center;';
                 
+                // 📋 بوطونة نسخ البيانات
+                var cpBtn = document.createElement('button'); cpBtn.innerText = "📋"; cpBtn.title = "نسخ النص الموحد"; cpBtn.style.cssText = 'background:transparent; border:none; cursor:pointer; font-size:11px; padding:0 2px;';
+                cpBtn.onclick = function(e) { 
+                    e.stopPropagation(); 
+                    let pd = profile.data || {};
+                    let textToCopy = `الاسم: ${pd.FirstName || ''} ${pd.LastName || ''}\nالباسبور: ${pd.PassportNo || ''}\nتاريخ الازدياد: ${pd.DOB || ''}\nالإصدار: ${pd.PassportIssueDate || ''}\nالانتهاء: ${pd.PassportExpiryDate || ''}\nالمركز: ${pd.Centre || ''}`;
+                    navigator.clipboard.writeText(textToCopy).then(() => { alert(`✅ تم نسخ بيانات [${profile.name}] بنجاح!`); });
+                };
+                
                 var edit = document.createElement('button'); edit.innerText = "✏️"; edit.style.cssText = 'background:transparent; border:none; cursor:pointer; font-size:11px; padding:0 2px;';
                 edit.onclick = function(e) { e.stopPropagation(); showProfileForm(profile.id); };
                 
-                actions.appendChild(edit); clientRow.appendChild(actions);
+                actions.appendChild(cpBtn); actions.appendChild(edit); clientRow.appendChild(actions);
                 let clientPressTimer;
                 clientRow.addEventListener('mousedown', function(e) { if (e.target.tagName === 'BUTTON') return; clientPressTimer = setTimeout(function() { if (confirm(`حذف الكليان: ${profile.name}؟`)) deleteProfileFromServer(profile.id); }, 4000); });
                 clientRow.addEventListener('mouseup', function(e) { if (e.target.tagName === 'BUTTON') return; clearTimeout(clientPressTimer); injectDataToFields(profile.data); clientRow.style.background = "#50fa7b"; setTimeout(() => { clientRow.style.background = "#1e1f29"; }, 600); });
