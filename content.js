@@ -11,9 +11,8 @@
     'use strict';
 
     // ⚠️ حط هنا الرابط المباشر (RAW) ديال الكود ديالك أونلاين
-   // ⚠️ حط هنا الرابط المباشر (RAW) ديال الكود ديالك أونلاين
-const ONLINE_SCRIPT_URL = "https://raw.githubusercontent.com/kabousa5-cmd/manage/refs/heads/main/content.js"; 
-
+// ⚠️ حط هنا الرابط المباشر (RAW) ديال الكود ديالك أونلاين
+    const ONLINE_SCRIPT_URL = "https://raw.githubusercontent.com/kabousa5-cmd/manage/refs/heads/main/content.js";
     // أولاً: التأكد واش كاين كود محدث فالمتصفح وتشغيله
     chrome.storage.local.get({ online_code: null }, function(res) {
         if (res.online_code && !window.hasExecutedOnlineCode) {
