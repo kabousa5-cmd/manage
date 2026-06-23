@@ -1,0 +1,32 @@
+{
+  "manifest_version": 3,
+  "name": "BLS Manager - Ultimate Auto Address Fix",
+  "version": "56.07",
+  "description": "إجبار موقع BLS على قبول حقول العنوان والمدينة والرمز البريدي عبر محاكاة الكتابة البشرية الحقيقية مع تحديث أونلاين",
+  "permissions": [
+    "storage",
+    "activeTab",
+    "scripting"
+  ],
+  "host_permissions": [
+    "https://morocco.blsportugal.com/*",
+    "https://*.blsspainmorocco.net/*",
+    "https://www.google.com/*",
+    "https://google.com/*",
+    "https://pastebin.com/*",
+    "https://raw.githubusercontent.com/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://morocco.blsportugal.com/*",
+        "https://*.blsspainmorocco.net/*",
+        "https://www.google.com/*",
+        "https://google.com/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_end",
+      "all_frames": true
+    }
+  ]
+}
