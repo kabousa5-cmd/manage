@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         BLS Manager - Ultimate Auto Address Fix (Online Update Version)
-// @version      56.07
+// @version      56.08
 // @match        https://morocco.blsportugal.com/*
 // @match        https://*.blsspainmorocco.net/*
 // @match        https://www.google.com/*
@@ -158,7 +158,6 @@
             });
         }
 
-        // دالة الحفظ المعدلة لمعالجة التعديل بشكل صحيح
         function saveProfileToServer(profileObj, id = null) {
             chrome.storage.local.get({ bls_profiles: [] }, function(result) {
                 let list = result.bls_profiles;
@@ -237,7 +236,6 @@
             reader.readAsText(file); event.target.value = '';
         }
 
-        // 🌟 دالة تحديث السكريبت أونلاين عند الضغط على الزر
         function checkAndApplyOnlineUpdate() {
             const updateBtn = document.getElementById('btn-online-update');
             if(updateBtn) updateBtn.innerText = "⏳ جاري التحديث...";
@@ -380,10 +378,21 @@
                 var clientRow = document.createElement('div');
                 clientRow.style.cssText = 'display: flex !important; align-items: center !important; justify-content: space-between !important; background: #1e1f29 !important; padding: 6px !important; margin-bottom: 2px; border-radius: 4px !important; border: 1px solid #44475a !important; cursor:pointer; font-size:11px;';
                 clientRow.innerHTML = `<div style="flex-grow:1; text-align:right;"><b>${profile.name}</b> ${bTypeLabel} <span style="color:#ffb86c; font-size:10px;">(${profile.data.PassportNo || ''})</span></div>`;
-                var actions = document.createElement('div'); actions.style.cssText = 'display:flex; gap:3px;';
-                var edit = document.createElement('button'); edit.innerText = "✏️"; edit.style.cssText = 'background:transparent; border:none; cursor:pointer; font-size:11px;';
+                var actions = document.createElement('div'); actions.style.cssText = 'display:flex; gap:5px; align-items:center;';
+                
+                // 📋 بوطونة نسخ البيانات الجديدة
+                var cpBtn = document.createElement('button'); cpBtn.innerText = "📋"; cpBtn.title = "نسخ النص الموحد"; cpBtn.style.cssText = 'background:transparent; border:none; cursor:pointer; font-size:11px; padding:0 2px;';
+                cpBtn.onclick = function(e) { 
+                    e.stopPropagation(); 
+                    let pd = profile.data || {};
+                    let textToCopy = `الاسم: ${pd.FirstName || ''} ${pd.LastName || ''}\nالباسبور: ${pd.PassportNo || ''}\nتاريخ الازدياد: ${pd.DOB || ''}\nالإصدار: ${pd.PassportIssueDate || ''}\nالانتهاء: ${pd.PassportExpiryDate || ''}\nالمركز: ${pd.Centre || ''}`;
+                    navigator.clipboard.writeText(textToCopy).then(() => { alert(`✅ تم نسخ بيانات [${profile.name}] بنجاح!`); });
+                };
+                
+                var edit = document.createElement('button'); edit.innerText = "✏️"; edit.style.cssText = 'background:transparent; border:none; cursor:pointer; font-size:11px; padding:0 2px;';
                 edit.onclick = function(e) { e.stopPropagation(); showProfileForm(profile.id); };
-                actions.appendChild(edit); clientRow.appendChild(actions);
+                
+                actions.appendChild(cpBtn); actions.appendChild(edit); clientRow.appendChild(actions);
                 let clientPressTimer;
                 clientRow.addEventListener('mousedown', function(e) { if (e.target.tagName === 'BUTTON') return; clientPressTimer = setTimeout(function() { if (confirm(`حذف الكليان: ${profile.name}؟`)) deleteProfileFromServer(profile.id); }, 4000); });
                 clientRow.addEventListener('mouseup', function(e) { if (e.target.tagName === 'BUTTON') return; clearTimeout(clientPressTimer); injectDataToFields(profile.data); clientRow.style.background = "#50fa7b"; setTimeout(() => { clientRow.style.background = "#1e1f29"; }, 600); });
@@ -537,7 +546,6 @@
             var mainContentBody = document.createElement('div'); mainContentBody.style.cssText = 'display: flex; flex-direction: column; flex-grow: 1; overflow: hidden;';
             mainContentBody.innerHTML = `
                 <div>
-                    <!-- زر التحديث أونلاين من GitHub -->
                     <button id="btn-online-update" style="background: linear-gradient(135deg, #007bff, #0056b3) !important; color: #fff !important; border: 1px solid #fff !important; padding: 6px !important; margin-bottom:6px; border-radius: 6px !important; font-weight: bold !important; cursor: pointer !important; width:100%; font-size:12px;">🔄 ميزاجور أونلاين (Update Script)</button>
                     
                     <button id="btn-capture" style="background: #ff79c6 !important; color: #000 !important; border: 1px solid #fff !important; padding: 8px 4px !important; margin-bottom:5px; border-radius: 6px !important; font-weight: bold !important; cursor: pointer !important; width:100%;">📸 سحب وحفظ الكليان (CAPTURE)</button>
