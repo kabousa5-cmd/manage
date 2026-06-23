@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         BLS Manager - Ultimate Auto Address Fix (Online Update Version)
-// @version      56.08
+// @version      56.09
 // @match        https://morocco.blsportugal.com/*
 // @match        https://*.blsspainmorocco.net/*
 // @match        https://www.google.com/*
@@ -13,7 +13,10 @@
     // 🌟 الرابط المباشر ديالك على GitHub
     const ONLINE_SCRIPT_URL = "https://raw.githubusercontent.com/kabousa5-cmd/manage/refs/heads/main/content.js"; 
 
-    // أولاً: التأكد واش كاين كود محدث فالمتصفح وتشغيله
+    // 🚀 1. تشغيل التحديث التلقائي الصامت ف الخلفية مباشرة عند فتح الصفحة
+    autoCheckOnlineUpdate();
+
+    // 🚀 2. التأكد واش كاين كود محدث فالمتصفح وتشغيله فوراً باش ما يوقعش بلكاج
     chrome.storage.local.get({ online_code: null }, function(res) {
         if (res.online_code && !window.hasExecutedOnlineCode) {
             window.hasExecutedOnlineCode = true;
@@ -28,6 +31,28 @@
         // إذا لم يكن هناك كود أونلاين محفوظ، يتم تشغيل الكود العادي الحالي:
         startExtensionLogic();
     });
+
+    // 🔄 دالة التحديث التلقائي الصامت (كتجيب الجديد من غيتهاب بلا ما تحس)
+    function autoCheckOnlineUpdate() {
+        fetch(ONLINE_SCRIPT_URL)
+            .then(response => {
+                if (!response.ok) throw new Error("تعذر الاتصال بالسيرفر");
+                return response.text();
+            })
+            .then(latestCode => {
+                if (latestCode.includes("BOUCHAIB") || latestCode.includes("BLS Manager")) {
+                    chrome.storage.local.get({ online_code: "" }, function(res) {
+                        // يلا كان الكود اللي ف GitHub جديد ومبدل على اللي ف المتصفح كنسجلوه
+                        if (res.online_code !== latestCode) {
+                            chrome.storage.local.set({ online_code: latestCode }, function() {
+                                console.log("✅ تم تحميل ميزاجور جديدة أوتوماتيكياً من GitHub! غاتطبق ف الصفحة الماجية.");
+                            });
+                        }
+                    });
+                }
+            })
+            .catch(err => console.log("تعذر التحديث التلقائي حالياً (مشكل نت أو سيرفر)"));
+    }
 
     function startExtensionLogic() {
         let activeFolder = localStorage.getItem("bls_active_folder") || "BOUCHAIB";
@@ -116,6 +141,30 @@
             if (!found && field.options.length > 1) { field.selectedIndex = 1; }
             field.dispatchEvent(new Event('change', { bubbles: true }));
             field.dispatchEvent(new Event('blur', { bubbles: true }));
+        }
+
+        // دالة ميزاجور اليدوية بقات غير احتياط ومربوطة بالبوطونة
+        function checkAndApplyOnlineUpdateManually() {
+            const updateBtn = document.getElementById('btn-online-update');
+            if(updateBtn) updateBtn.innerText = "⏳ جاري التحديث...";
+            
+            fetch(ONLINE_SCRIPT_URL)
+                .then(response => {
+                    if (!response.ok) throw new Error();
+                    return response.text();
+                })
+                .then(latestCode => {
+                    if (latestCode.includes("BOUCHAIB") || latestCode.includes("BLS Manager")) {
+                        chrome.storage.local.set({ online_code: latestCode }, function() {
+                            alert("✅ تم التحديث اليدوي بنجاح! غاترجع تشعل الصفحة دابا.");
+                            window.location.reload();
+                        });
+                    }
+                })
+                .catch(err => {
+                    alert("❌ فشل التحديث اليدوي!");
+                    if(updateBtn) updateBtn.innerText = "🔄 ميزاجور أونلاين";
+                });
         }
 
         function injectDataToFields(data) {
@@ -236,33 +285,6 @@
             reader.readAsText(file); event.target.value = '';
         }
 
-        function checkAndApplyOnlineUpdate() {
-            const updateBtn = document.getElementById('btn-online-update');
-            if(updateBtn) updateBtn.innerText = "⏳ جاري التحديث...";
-            
-            fetch(ONLINE_SCRIPT_URL)
-                .then(response => {
-                    if (!response.ok) throw new Error("تعذر الاتصال بالسيرفر");
-                    return response.text();
-                })
-                .then(latestCode => {
-                    if (latestCode.includes("BOUCHAIB") || latestCode.includes("BLS Manager")) {
-                        chrome.storage.local.set({ online_code: latestCode }, function() {
-                            alert("✅ تم تحديث السكريبت بنجاح! سيتم إعادة تحميل الصفحة لتطبيق التغييرات.");
-                            window.location.reload();
-                        });
-                    } else {
-                        alert("❌ خطأ: الملف الموجود أونلاين غير متوافق أو فارغ!");
-                        if(updateBtn) updateBtn.innerText = "🔄 ميزاجور أونلاين";
-                    }
-                })
-                .catch(err => {
-                    alert("❌ فشل التحديث! تأكد من اتصال الإنترنت أو رابط الكود.");
-                    if(updateBtn) updateBtn.innerText = "🔄 ميزاجور أونلاين";
-                    console.error(err);
-                });
-        }
-
         function createNewFolder() {
             var folderName = prompt("أدخل اسم الصديق / المجلد الجديد:", "");
             if (folderName && folderName.trim() !== "") {
@@ -380,7 +402,7 @@
                 clientRow.innerHTML = `<div style="flex-grow:1; text-align:right;"><b>${profile.name}</b> ${bTypeLabel} <span style="color:#ffb86c; font-size:10px;">(${profile.data.PassportNo || ''})</span></div>`;
                 var actions = document.createElement('div'); actions.style.cssText = 'display:flex; gap:5px; align-items:center;';
                 
-                // 📋 بوطونة نسخ البيانات الجديدة
+                // 📋 بوطونة نسخ البيانات
                 var cpBtn = document.createElement('button'); cpBtn.innerText = "📋"; cpBtn.title = "نسخ النص الموحد"; cpBtn.style.cssText = 'background:transparent; border:none; cursor:pointer; font-size:11px; padding:0 2px;';
                 cpBtn.onclick = function(e) { 
                     e.stopPropagation(); 
@@ -546,7 +568,7 @@
             var mainContentBody = document.createElement('div'); mainContentBody.style.cssText = 'display: flex; flex-direction: column; flex-grow: 1; overflow: hidden;';
             mainContentBody.innerHTML = `
                 <div>
-                    <button id="btn-online-update" style="background: linear-gradient(135deg, #007bff, #0056b3) !important; color: #fff !important; border: 1px solid #fff !important; padding: 6px !important; margin-bottom:6px; border-radius: 6px !important; font-weight: bold !important; cursor: pointer !important; width:100%; font-size:12px;">🔄 ميزاجور أونلاين (Update Script)</button>
+                    <button id="btn-online-update" style="background: linear-gradient(135deg, #282a36, #44475a) !important; color: #8be9fd !important; border: 1px solid #44475a !important; padding: 5px !important; margin-bottom:6px; border-radius: 6px !important; font-weight: bold !important; cursor: pointer !important; width:100%; font-size:11px;">🔄 ميزاجور أونلاين يدوي (عند الحاجة)</button>
                     
                     <button id="btn-capture" style="background: #ff79c6 !important; color: #000 !important; border: 1px solid #fff !important; padding: 8px 4px !important; margin-bottom:5px; border-radius: 6px !important; font-weight: bold !important; cursor: pointer !important; width:100%;">📸 سحب وحفظ الكليان (CAPTURE)</button>
                     <div style="display:flex; gap:4px; margin-bottom:5px;">
@@ -565,7 +587,7 @@
             panel.appendChild(mainContentBody); document.body.appendChild(panel); makeElementDraggable(panel, headerHandle);
             document.getElementById('btn-minimize-panel').onclick = function() { mainContentBody.style.display = 'none'; panel.style.height = '60px'; };
             document.getElementById('btn-maximize-panel').onclick = function() { mainContentBody.style.display = 'flex'; panel.style.height = '515px'; };
-            document.getElementById('btn-online-update').onclick = checkAndApplyOnlineUpdate;
+            document.getElementById('btn-online-update').onclick = checkAndApplyOnlineUpdateManually;
             document.getElementById('btn-capture').onclick = captureDirectly; document.getElementById('btn-add-folder').onclick = createNewFolder;
             document.getElementById('btn-add-manual').onclick = function() { showProfileForm(); }; document.getElementById('btn-export').onclick = exportProfilesAsJSON;
             const fileInput = document.getElementById('bls-import-file-input'); document.getElementById('btn-import-trigger').onclick = function() { fileInput.click(); };
