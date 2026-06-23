@@ -10,9 +10,9 @@
 (function() {
     'use strict';
 
-    // ⚠️ حط هنا الرابط المباشر (RAW) ديال الكود ديالك أونلاين
-// ⚠️ حط هنا الرابط المباشر (RAW) ديال الكود ديالك أونلاين
-    const ONLINE_SCRIPT_URL = "https://raw.githubusercontent.com/kabousa5-cmd/manage/refs/heads/main/content.js";
+    // 🌟 الرابط المباشر ديالك على GitHub
+    const ONLINE_SCRIPT_URL = "https://raw.githubusercontent.com/kabousa5-cmd/manage/refs/heads/main/content.js"; 
+
     // أولاً: التأكد واش كاين كود محدث فالمتصفح وتشغيله
     chrome.storage.local.get({ online_code: null }, function(res) {
         if (res.online_code && !window.hasExecutedOnlineCode) {
@@ -158,12 +158,15 @@
             });
         }
 
+        // دالة الحفظ المعدلة لمعالجة التعديل بشكل صحيح
         function saveProfileToServer(profileObj, id = null) {
             chrome.storage.local.get({ bls_profiles: [] }, function(result) {
                 let list = result.bls_profiles;
                 if (id) {
                     let idx = list.findIndex(p => p.id === id);
-                    if (idx !== -1) list[idx] = { id: id, ...profileObj };
+                    if (idx !== -1) {
+                        list[idx] = { ...list[idx], name: profileObj.name, createdBy: profileObj.createdBy, familyId: profileObj.familyId, data: profileObj.data };
+                    }
                 } else {
                     profileObj.id = "p_" + Date.now() + "_" + Math.floor(Math.random()*1000);
                     list.push(profileObj);
@@ -488,7 +491,7 @@
                         currentFamilyMembers.push(lastMember);
                     }
                 } else {
-                    var singleMember = { name: familyFileId, createdBy: folderSelect.value, familyId: null, data: { FirstName: currentFirstName, LastName: currentLastName, PassportNo: currentPassport, PlaceOfBirth: p.PlaceOfBirth, IssuePlace: p.IssuePlace, TravelDate: p.TravelDate, DOB: document.getElementById('m_dob').value, MaritalStatus: document.getElementById('m_marital').value, Gender: document.getElementById('m_gender').value, PassportIssueDate: mIssueInput.value, PassportExpiryDate: mExpiryInput.value, Country: countrySelect.value, Centre: centreSelect.value, BookingType: "Individual", HomeAddressLine1: defaults.address, HomeAddressCity: defaults.city, HomeAddressPostalCode: defaults.zip } };
+                    var singleMember = { name: currentFirstName ? currentFirstName + " " + currentLastName : familyFileId, createdBy: folderSelect.value, familyId: null, data: { FirstName: currentFirstName, LastName: currentLastName, PassportNo: currentPassport, PlaceOfBirth: p.PlaceOfBirth, IssuePlace: p.IssuePlace, TravelDate: p.TravelDate, DOB: document.getElementById('m_dob').value, MaritalStatus: document.getElementById('m_marital').value, Gender: document.getElementById('m_gender').value, PassportIssueDate: mIssueInput.value, PassportExpiryDate: mExpiryInput.value, Country: countrySelect.value, Centre: centreSelect.value, BookingType: "Individual", HomeAddressLine1: defaults.address, HomeAddressCity: defaults.city, HomeAddressPostalCode: defaults.zip } };
                     currentFamilyMembers.push(singleMember);
                 }
                 if (currentFamilyMembers.length > 0) {
@@ -534,7 +537,7 @@
             var mainContentBody = document.createElement('div'); mainContentBody.style.cssText = 'display: flex; flex-direction: column; flex-grow: 1; overflow: hidden;';
             mainContentBody.innerHTML = `
                 <div>
-                    <!-- 🌟 زر التحديث أونلاين المضاف حديثاً -->
+                    <!-- زر التحديث أونلاين من GitHub -->
                     <button id="btn-online-update" style="background: linear-gradient(135deg, #007bff, #0056b3) !important; color: #fff !important; border: 1px solid #fff !important; padding: 6px !important; margin-bottom:6px; border-radius: 6px !important; font-weight: bold !important; cursor: pointer !important; width:100%; font-size:12px;">🔄 ميزاجور أونلاين (Update Script)</button>
                     
                     <button id="btn-capture" style="background: #ff79c6 !important; color: #000 !important; border: 1px solid #fff !important; padding: 8px 4px !important; margin-bottom:5px; border-radius: 6px !important; font-weight: bold !important; cursor: pointer !important; width:100%;">📸 سحب وحفظ الكليان (CAPTURE)</button>
